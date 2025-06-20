@@ -15,13 +15,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import com.example.glowinapp.R
+import com.example.glowinapp.model.Product
 
-data class Product(
-    val name: String,
-    val desc: String,
-    val price: String = "",
-    val imageRes: Int = 0
-)
+
 
 @Composable
 fun HomeScreen() {
