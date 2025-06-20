@@ -13,14 +13,45 @@ fun MainScreen() {
     val tabs = listOf("Home", "Discover", "Cart", "Profile")
     var selectedTab by remember { mutableStateOf(0) }
 
-    // Wishlist state shared between screens
+    // Wishlist shared state
     val wishlist = remember { mutableStateListOf<Product>() }
+
+    // Cart shared state
+    val cart = remember { mutableStateListOf<Product>() }
 
     fun toggleWishlist(product: Product) {
         if (wishlist.contains(product)) {
             wishlist.remove(product)
         } else {
             wishlist.add(product)
+        }
+    }
+
+    fun addToCart(product: Product) {
+        val existing = cart.find { it.name == product.name }
+        if (existing != null) {
+            val index = cart.indexOf(existing)
+            cart[index] = existing.copy(quantity = existing.quantity + 1)
+        } else {
+            cart.add(product.copy(quantity = 1))
+        }
+    }
+
+    fun increaseQuantity(product: Product) {
+        val index = cart.indexOf(product)
+        if (index != -1) {
+            cart[index] = product.copy(quantity = product.quantity + 1)
+        }
+    }
+
+    fun decreaseQuantity(product: Product) {
+        val index = cart.indexOf(product)
+        if (index != -1) {
+            if (product.quantity > 1) {
+                cart[index] = product.copy(quantity = product.quantity - 1)
+            } else {
+                cart.removeAt(index)
+            }
         }
     }
 
@@ -48,8 +79,16 @@ fun MainScreen() {
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedTab) {
                 0 -> HomeScreen(wishlist = wishlist, onToggleWishlist = { toggleWishlist(it) })
-                1 -> DiscoverScreen(wishlist = wishlist, onToggleWishlist = { toggleWishlist(it) })
-                2 -> CartScreen()
+                1 -> DiscoverScreen(
+                    wishlist = wishlist,
+                    onToggleWishlist = { toggleWishlist(it) },
+                    onAddToCart = { addToCart(it) }
+                )
+                2 -> CartScreen(
+                    cart = cart,
+                    onIncreaseQuantity = { increaseQuantity(it) },
+                    onDecreaseQuantity = { decreaseQuantity(it) }
+                )
                 3 -> ProfileScreen()
             }
         }

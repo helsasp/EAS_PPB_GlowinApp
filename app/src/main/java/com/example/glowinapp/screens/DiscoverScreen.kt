@@ -25,104 +25,24 @@ import com.example.glowinapp.R
 @Composable
 fun DiscoverScreen(
     wishlist: List<Product>,
-    onToggleWishlist: (Product) -> Unit
+    onToggleWishlist: (Product) -> Unit,
+    onAddToCart: (Product) -> Unit // ✅ Tambahan parameter untuk cart
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedProduct by remember { mutableStateOf<Product?>(null) }
 
     val allProducts = listOf(
-        Product(
-            name = "Lip Glow Oil",
-            brand = "Dior",
-            desc = "Nourishing glossy oil",
-            price = "$38",
-            imageRes = R.drawable.product1,
-            ingredients = "Cherry Oil, Glycerin, Tocopherol",
-            usage = "Apply directly on lips for glossy shine"
-        ),
-        Product(
-            name = "Tinted Moisturizer",
-            brand = "Laura Mercier",
-            desc = "Natural skin tint with SPF",
-            price = "$48",
-            imageRes = R.drawable.product2,
-            ingredients = "Titanium Dioxide, Vitamin E",
-            usage = "Blend with fingertips on clean skin"
-        ),
-        Product(
-            name = "Lip Kit",
-            brand = "Kylie Cosmetics",
-            desc = "Matte lipstick & liner",
-            price = "$29",
-            imageRes = R.drawable.product3,
-            ingredients = "Dimethicone, Iron Oxides",
-            usage = "Outline lips with liner, fill with lipstick"
-        ),
-        Product(
-            name = "Concealer",
-            brand = "NARS",
-            desc = "Radiant creamy coverage",
-            price = "$32",
-            imageRes = R.drawable.product4,
-            ingredients = "Water, Mica, Glycerin",
-            usage = "Dab under eyes and blend gently"
-        ),
-        Product(
-            name = "Lip Sleeping Mask",
-            brand = "Laneige",
-            desc = "Hydrating overnight lip mask",
-            price = "$24",
-            imageRes = R.drawable.product5,
-            ingredients = "Berry Mix Complex™, Shea Butter",
-            usage = "Apply before bed on clean lips"
-        ),
-        Product(
-            name = "Glow Recipe Watermelon Glow",
-            brand = "Glow Recipe",
-            desc = "Dewy serum for glowing skin",
-            price = "$39",
-            imageRes = R.drawable.product6,
-            ingredients = "Watermelon Extract, Hyaluronic Acid",
-            usage = "Pat gently onto skin after toner"
-        ),
-        Product(
-            name = "Rare Beauty Blush",
-            brand = "Rare Beauty",
-            desc = "Soft pinch liquid blush",
-            price = "$23",
-            imageRes = R.drawable.product7,
-            ingredients = "Mica, Dimethicone",
-            usage = "Apply 1-2 dots and blend"
-        ),
-        Product(
-            name = "Charlotte Tilbury Airbrush Flawless",
-            brand = "Charlotte Tilbury",
-            desc = "Full-coverage matte foundation",
-            price = "$49",
-            imageRes = R.drawable.product8,
-            ingredients = "Silica, Glycerin, Vitamin C",
-            usage = "Apply evenly using brush or sponge"
-        ),
-        Product(
-            name = "Anastasia Brow Wiz",
-            brand = "Anastasia Beverly Hills",
-            desc = "Precise brow pencil",
-            price = "$25",
-            imageRes = R.drawable.product9,
-            ingredients = "Iron Oxides, Beeswax",
-            usage = "Fill in sparse brow areas"
-        ),
-        Product(
-            name = "Sol de Janeiro Brazilian Bum Bum Cream",
-            brand = "Sol de Janeiro",
-            desc = "Fast-absorbing body cream",
-            price = "$48",
-            imageRes = R.drawable.product10,
-            ingredients = "Guaraná, Cupuaçu Butter, Coconut Oil",
-            usage = "Massage into skin in circular motions"
-        )
+        Product("Lip Glow Oil", "Nourishing glossy oil", "$38", R.drawable.product1, 1, "Cherry Oil, Glycerin, Tocopherol", "Apply directly on lips for glossy shine", "Dior"),
+        Product("Tinted Moisturizer", "Natural skin tint with SPF", "$48", R.drawable.product2, 1, "Titanium Dioxide, Vitamin E", "Blend with fingertips on clean skin", "Laura Mercier"),
+        Product("Lip Kit", "Matte lipstick & liner", "$29", R.drawable.product3, 1, "Dimethicone, Iron Oxides", "Outline lips with liner, fill with lipstick", "Kylie Cosmetics"),
+        Product("Concealer", "Radiant creamy coverage", "$32", R.drawable.product4, 1, "Water, Mica, Glycerin", "Dab under eyes and blend gently", "NARS"),
+        Product("Lip Sleeping Mask", "Hydrating overnight lip mask", "$24", R.drawable.product5, 1, "Berry Mix Complex™, Shea Butter", "Apply before bed on clean lips", "Laneige"),
+        Product("Watermelon Glow", "Dewy serum for glowing skin", "$39", R.drawable.product6, 1, "Watermelon Extract, Hyaluronic Acid", "Pat gently onto skin after toner", "Glow Recipe"),
+        Product("Rare Beauty Blush", "Soft pinch liquid blush", "$23", R.drawable.product7, 1, "Mica, Dimethicone", "Apply 1-2 dots and blend", "Rare Beauty"),
+        Product("Airbrush Flawless", "Full-coverage matte foundation", "$49", R.drawable.product8, 1, "Silica, Glycerin, Vitamin C", "Apply evenly using brush or sponge", "Charlotte Tilbury"),
+        Product("Anastasia Brow Wiz", "Precise brow pencil", "$25", R.drawable.product9, 1, "Iron Oxides, Beeswax", "Fill in sparse brow areas", "Anastasia Beverly Hills"),
+        Product("Bum Bum Cream", "Fast-absorbing body cream", "$48", R.drawable.product10, 1, "Guaraná, Cupuaçu Butter, Coconut Oil", "Massage into skin in circular motions", "Sol de Janeiro")
     )
-
 
     val filtered = allProducts.filter {
         it.name.contains(searchQuery, ignoreCase = true)
@@ -158,7 +78,8 @@ fun DiscoverScreen(
             product = selectedProduct!!,
             onBack = { selectedProduct = null },
             isWishlisted = wishlist.contains(selectedProduct!!),
-            onToggleWishlist = { onToggleWishlist(it) }
+            onToggleWishlist = { onToggleWishlist(it) },
+            onAddToCart = { onAddToCart(it) } // ✅ Diteruskan
         )
     }
 }
@@ -209,7 +130,8 @@ fun ProductDetailView(
     product: Product,
     onBack: () -> Unit,
     isWishlisted: Boolean,
-    onToggleWishlist: (Product) -> Unit
+    onToggleWishlist: (Product) -> Unit,
+    onAddToCart: (Product) -> Unit // ✅ Ditambahkan
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFFDF6F0)) {
         Column(
@@ -256,7 +178,7 @@ fun ProductDetailView(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { /* Add to cart logic */ },
+                onClick = { onAddToCart(product) }, // ✅ Berfungsi
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
