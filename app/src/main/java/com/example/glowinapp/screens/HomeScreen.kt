@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -17,32 +18,19 @@ import androidx.compose.ui.unit.*
 import com.example.glowinapp.R
 import com.example.glowinapp.model.Product
 
-
-
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    wishlist: List<Product>,
+    onToggleWishlist: (Product) -> Unit
+) {
     val bestProducts = listOf(
-        Product("Rare Beauty Soft Pinch Blush", "Natural flush, buildable", "$23", R.drawable.product1),
-        Product("Charlotte Flawless Filter", "Glow booster for skin", "$44", R.drawable.product2),
-        Product("Sephora Cream Lip Stain", "Long-lasting matte", "$15", R.drawable.product3),
-        Product("NARS Radiant Concealer", "High coverage & glow", "$32", R.drawable.product4),
-        Product("Laneige Lip Sleeping Mask", "Hydrating overnight", "$24", R.drawable.product5),
-        Product("Fenty Gloss Bomb", "Universal lip luminizer", "$21", R.drawable.product6),
-        Product("Glow Recipe Watermelon Dew", "Hydrating serum", "$39", R.drawable.product7),
-        Product("Benefit Hoola Bronzer", "Natural matte finish", "$35", R.drawable.product8),
-        Product("Tarte Shape Tape", "Iconic full coverage", "$31", R.drawable.product9),
-        Product("Hourglass Vanish Stick", "Seamless skin stick", "$49", R.drawable.product10)
+        Product("Rare Beauty Soft Pinch Blush", "Natural flush, buildable", "$23", R.drawable.product1, brand = "Rare Beauty"),
+        Product("Charlotte Flawless Filter", "Glow booster for skin", "$44", R.drawable.product2, brand = "Charlotte Tilbury"),
+        Product("Sephora Cream Lip Stain", "Long-lasting matte", "$15", R.drawable.product3, brand = "Sephora"),
+        Product("NARS Radiant Concealer", "High coverage & glow", "$32", R.drawable.product4, brand = "NARS"),
+        Product("Laneige Lip Sleeping Mask", "Hydrating overnight", "$24", R.drawable.product5, brand = "Laneige"),
+        Product("Fenty Gloss Bomb", "Universal lip luminizer", "$21", R.drawable.product6, brand = "Fenty Beauty"),
     )
-
-    val wishlist = remember {
-        mutableStateListOf(
-            Product("Dior Addict Lip Glow", "Color-reviving balm with shine"),
-            Product("Kylie Matte Lip Kit", "Iconic long-lasting matte lips"),
-            Product("Sol de Janeiro Bum Bum Cream", "Fast-absorbing body cream"),
-            Product("Rare Beauty Lip Oil", "Glossy lip tint with shine"),
-            Product("Urban Decay Setting Spray", "Locks makeup all day")
-        )
-    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -74,9 +62,7 @@ fun HomeScreen() {
             items(wishlist, key = { it.name }) { item ->
                 FavoriteCard(
                     product = item,
-                    onToggleLove = {
-                        wishlist.remove(item) // ❤️ klik → langsung ilang
-                    }
+                    onToggleLove = { onToggleWishlist(item) }
                 )
             }
 

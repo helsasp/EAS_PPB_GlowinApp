@@ -6,11 +6,23 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.example.glowinapp.model.Product
 
 @Composable
 fun MainScreen() {
     val tabs = listOf("Home", "Discover", "Cart", "Profile")
     var selectedTab by remember { mutableStateOf(0) }
+
+    // Wishlist state shared between screens
+    val wishlist = remember { mutableStateListOf<Product>() }
+
+    fun toggleWishlist(product: Product) {
+        if (wishlist.contains(product)) {
+            wishlist.remove(product)
+        } else {
+            wishlist.add(product)
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -35,8 +47,8 @@ fun MainScreen() {
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedTab) {
-                0 -> HomeScreen()
-                1 -> DiscoverScreen()
+                0 -> HomeScreen(wishlist = wishlist, onToggleWishlist = { toggleWishlist(it) })
+                1 -> DiscoverScreen(wishlist = wishlist, onToggleWishlist = { toggleWishlist(it) })
                 2 -> CartScreen()
                 3 -> ProfileScreen()
             }
