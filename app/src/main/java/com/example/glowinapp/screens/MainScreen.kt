@@ -1,4 +1,4 @@
-// Updated MainScreen.kt with better navigation and UI
+// Enhanced MainScreen.kt with REAL product images
 package com.example.glowinapp.screens
 
 import androidx.compose.foundation.*
@@ -12,16 +12,31 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
 import com.example.glowinapp.model.Product
 import com.example.glowinapp.R
+
+// Helper function to check if image resource is valid
+@Composable
+fun isValidImageResource(imageRes: Int): Boolean {
+    val context = LocalContext.current
+    return try {
+        context.resources.getDrawable(imageRes, null)
+        true
+    } catch (e: Exception) {
+        false
+    }
+}
 
 @Composable
 fun MainScreen(navController: NavHostController) {
@@ -33,6 +48,9 @@ fun MainScreen(navController: NavHostController) {
 
     // Cart shared state
     val cart = remember { mutableStateListOf<Product>() }
+
+    // State to trigger recomposition when cart changes
+    var cartVersion by remember { mutableStateOf(0) }
 
     fun toggleWishlist(product: Product) {
         if (wishlist.contains(product)) {
@@ -50,12 +68,14 @@ fun MainScreen(navController: NavHostController) {
         } else {
             cart.add(product.copy(quantity = 1))
         }
+        cartVersion++ // Trigger recomposition
     }
 
     fun increaseQuantity(product: Product) {
         val index = cart.indexOf(product)
         if (index != -1) {
             cart[index] = product.copy(quantity = product.quantity + 1)
+            cartVersion++ // Trigger recomposition
         }
     }
 
@@ -67,14 +87,27 @@ fun MainScreen(navController: NavHostController) {
             } else {
                 cart.removeAt(index)
             }
+            cartVersion++ // Trigger recomposition
         }
     }
 
-    // Calculate total for cart
-    val totalAmount = remember(cart) {
-        cart.sumOf {
-            val cleanPrice = it.price.replace("$", "").toDoubleOrNull() ?: 0.0
-            cleanPrice * it.quantity
+    // Calculate total with reactive state
+    val totalAmount by remember {
+        derivedStateOf {
+            cart.sumOf { product ->
+                val priceString = product.price
+                    .replace("$", "")
+                    .replace(",", "")
+                    .trim()
+
+                val price = try {
+                    priceString.toDouble()
+                } catch (e: NumberFormatException) {
+                    0.0
+                }
+
+                price * product.quantity
+            }
         }
     }
 
@@ -106,7 +139,8 @@ fun MainScreen(navController: NavHostController) {
                     onContinueToPayment = {
                         navController.navigate("payment")
                     },
-                    totalAmount = totalAmount
+                    totalAmount = totalAmount,
+                    cartVersion = cartVersion
                 )
                 3 -> ProfileScreen(navController)
             }
@@ -195,14 +229,15 @@ fun EnhancedBottomNavigation(
     }
 }
 
-// Enhanced CartScreen with better UI and payment navigation
+// Enhanced CartScreen with REAL product images
 @Composable
 fun EnhancedCartScreen(
     cart: List<Product>,
     onIncreaseQuantity: (Product) -> Unit,
     onDecreaseQuantity: (Product) -> Unit,
     onContinueToPayment: () -> Unit,
-    totalAmount: Double
+    totalAmount: Double,
+    cartVersion: Int
 ) {
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -250,8 +285,8 @@ fun EnhancedCartScreen(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(cart) { product ->
-                        EnhancedCartItem(
+                    items(cart, key = { "${it.name}-${it.quantity}-$cartVersion" }) { product ->
+                        EnhancedCartItemWithImage(
                             product = product,
                             onIncreaseQuantity = onIncreaseQuantity,
                             onDecreaseQuantity = onDecreaseQuantity
@@ -281,9 +316,20 @@ fun EnhancedCartScreen(
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
 
-                        OrderSummaryRow("Subtotal", "$${String.format("%.2f", totalAmount)}")
-                        OrderSummaryRow("Gold Discount (15%)", "-$${String.format("%.2f", totalAmount * 0.15)}", Color(0xFFE91E63))
-                        OrderSummaryRow("Shipping", "FREE", Color(0xFFE91E63))
+                        OrderSummaryRow(
+                            "Subtotal",
+                            "$${String.format("%.2f", totalAmount)}"
+                        )
+                        OrderSummaryRow(
+                            "Gold Discount (15%)",
+                            "-$${String.format("%.2f", totalAmount * 0.15)}",
+                            Color(0xFFE91E63)
+                        )
+                        OrderSummaryRow(
+                            "Shipping",
+                            "FREE",
+                            Color(0xFFE91E63)
+                        )
 
                         Divider(
                             modifier = Modifier.padding(vertical = 12.dp),
@@ -333,8 +379,8 @@ fun EnhancedCartScreen(
                             tint = Color.White
                         )
                         Text(
-                            "Continue to Payment",
-                            fontSize = 18.sp,
+                            "Continue to Payment - $${String.format("%.2f", totalAmount * 0.85)}",
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -371,12 +417,22 @@ fun OrderSummaryRow(
     }
 }
 
+// NEW: Enhanced Cart Item with REAL images
 @Composable
-fun EnhancedCartItem(
+fun EnhancedCartItemWithImage(
     product: Product,
     onIncreaseQuantity: (Product) -> Unit,
     onDecreaseQuantity: (Product) -> Unit
 ) {
+    // Calculate item total
+    val priceString = product.price.replace("$", "").replace(",", "").trim()
+    val itemPrice = try {
+        priceString.toDouble()
+    } catch (e: NumberFormatException) {
+        0.0
+    }
+    val itemTotal = itemPrice * product.quantity
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -387,19 +443,26 @@ fun EnhancedCartItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Product Image Placeholder
-            Card(
-                modifier = Modifier.size(80.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF8F8F8)
-                )
+            // ENHANCED: Product Image with fallback (FIXED - No try-catch around Composable)
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp))
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("📸", fontSize = 32.sp)
+                // Check if we have a valid image resource
+                val hasValidImage = product.imageRes != 0 && isValidImageResource(product.imageRes)
+
+                if (hasValidImage) {
+                    // Load actual image resource
+                    Image(
+                        painter = painterResource(id = product.imageRes),
+                        contentDescription = product.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Beautiful placeholder when no image or invalid image
+                    BeautifulImagePlaceholder(product.name)
                 }
             }
 
@@ -419,10 +482,16 @@ fun EnhancedCartItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Price: ${product.price}",
+                    "Unit: ${product.price}",
                     fontSize = 14.sp,
                     color = Color(0xFFE91E63),
                     fontWeight = FontWeight.Medium
+                )
+                Text(
+                    "Total: $${String.format("%.2f", itemTotal)}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF3B2F2F),
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -466,6 +535,51 @@ fun EnhancedCartItem(
                 }
             }
         }
+    }
+}
+
+// NEW: Beautiful Image Placeholder
+@Composable
+fun BeautifulImagePlaceholder(productName: String) {
+    val emoji = when {
+        productName.contains("Lip", ignoreCase = true) -> "💄"
+        productName.contains("Skin", ignoreCase = true) -> "🧴"
+        productName.contains("Face", ignoreCase = true) -> "✨"
+        productName.contains("Eye", ignoreCase = true) -> "👁️"
+        productName.contains("Blush", ignoreCase = true) -> "🌸"
+        productName.contains("Foundation", ignoreCase = true) -> "🎨"
+        productName.contains("Concealer", ignoreCase = true) -> "🔸"
+        productName.contains("Mascara", ignoreCase = true) -> "👁️‍🗨️"
+        productName.contains("Moisturizer", ignoreCase = true) -> "💧"
+        productName.contains("Serum", ignoreCase = true) -> "✨"
+        productName.contains("Cream", ignoreCase = true) -> "🥛"
+        productName.contains("Oil", ignoreCase = true) -> "🫒"
+        productName.contains("Mask", ignoreCase = true) -> "😴"
+        productName.contains("Tint", ignoreCase = true) -> "🌺"
+        productName.contains("Gloss", ignoreCase = true) -> "✨"
+        productName.contains("Kit", ignoreCase = true) -> "🎁"
+        else -> "💅"
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFFE91E63).copy(alpha = 0.1f),
+                        Color(0xFFF8BBD9).copy(alpha = 0.2f),
+                        Color(0xFFFDF6F0)
+                    )
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = emoji,
+            fontSize = 32.sp
+        )
     }
 }
 

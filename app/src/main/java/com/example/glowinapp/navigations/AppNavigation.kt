@@ -23,12 +23,17 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable("payment") {
-            // You'll need to pass cart and total amount here
-            // For now, using dummy data
+            // For now, we'll use sample data since we can't pass complex objects through navigation
+            // In a real app, you'd use a shared ViewModel or state management
+            val sampleCart = listOf(
+                Product("Tinted Moisturizer", "Natural skin tint with SPF", "$48", 0, 1, "", "", "Laura Mercier")
+            )
+            val sampleTotal = 48.0
+
             PaymentScreen(
                 navController = navController,
-                cart = emptyList(), // Pass actual cart data
-                totalAmount = 0.0 // Pass actual total
+                cart = sampleCart,
+                totalAmount = sampleTotal
             )
         }
     }
