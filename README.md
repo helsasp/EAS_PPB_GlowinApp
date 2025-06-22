@@ -1,8 +1,8 @@
  # Premium Beauty Shopping Experience GLOWIN' Beauty Ecommerce App Android Studio
 
-Link Github : https://github.com/helsasp/EAS_PPB_GlowinApp
-Link Youtube : 
-Link PPT : https://www.canva.com/design/DAGq-nOXqLA/7VChxCV-bxyeXWhtXA4E9Q/view?utm_content=DAGq-nOXqLA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h53e9d80549
+Link Github : https://github.com/helsasp/EAS_PPB_GlowinApp <br>
+Link Youtube : (https://youtu.be/e2x-omRjq7E?si=VsHOvUUdWzGFpyEW) <br>
+Link PPT : https://www.canva.com/design/DAGq-nOXqLA/7VChxCV-bxyeXWhtXA4E9Q/view?utm_content=DAGq-nOXqLA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h53e9d80549 <br>
 
 ## 1. Pengenalan Aplikasi
 Judul: "Glowin' Beauty E-commerce: Revolusi Belanja Kecantikan di Era Digital ✨"
